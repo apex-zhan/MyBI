@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @Slf4j
+@Deprecated
 @Configuration
 @ConfigurationProperties(prefix = "wx.open")
 @Data

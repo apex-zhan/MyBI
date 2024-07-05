@@ -229,7 +229,6 @@ public class ChartController {
         return ResultUtils.success(result);
     }
 
-
     /**
      * 获取查询包装类
      *
@@ -261,87 +260,83 @@ public class ChartController {
     }
 
 
+
+
     /**
-     * 智能分析
+     * 智能分析（同步）
      *
      * @param multipartFile
      * @param genChartByAiRequest
      * @param request
      * @return
-     * @RequestPart("file")主要用于处理multipart/form-data类型的内容,请求的多部分内容中提取名为file的部分（通常是上传的文件）
      */
     @PostMapping("/gen")
-    public BaseResponse<BiResponse> GenChartByAi(@RequestPart("file") MultipartFile multipartFile, GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
-        String goal = genChartByAiRequest.getGoal();
+    public BaseResponse<BiResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
+                                                 GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
         String name = genChartByAiRequest.getName();
-        String chatType = genChartByAiRequest.getChatType();
+        String goal = genChartByAiRequest.getGoal();
+        String chartType = genChartByAiRequest.getChatType();
         // 校验
-        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
-        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称不能超过100个字符");
-        //登入后使用
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         User loginUser = userService.getLoginUser(request);
-
-//        final String prompt = "你是一个数据分析师和前端开发专家，接下来我会按照以下固定格式给你提供内容:\n" +
+        // 无需写 prompt，直接调用现有模型，https://www.yucongming.com，公众号搜【鱼聪明AI】
+//        final String prompt = "你是一个数据分析师和前端开发专家，接下来我会按照以下固定格式给你提供内容：\n" +
 //                "分析需求：\n" +
-//                "{数据分析的需求或者目标}\n"+
-//                "原始数据\n"+
-//                "{csv格式的原始数据，用，作为分隔符}\n"+
-//                "请根据这两部分内容，按照以下指定格式生成内容(此外不要输出任何多余的开头、结尾、注释)\n"+
-
+//                "{数据分析的需求或者目标}\n" +
+//                "原始数据：\n" +
+//                "{csv格式的原始数据，用,作为分隔符}\n" +
+//                "请根据这两部分内容，按照以下指定格式生成内容（此外不要输出任何多余的开头、结尾、注释）\n" +
 //                "【【【【【\n" +
-//                "{前端 Echarts v5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n"+
+//                "{前端 Echarts V5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n" +
 //                "【【【【【\n" +
-//                "{明确的数据分析结论:越详细越好，不要生成多余的注释}\n"+
-//                "【【【【【\
+//                "{明确的数据分析结论、越详细越好，不要生成多余的注释}";
+        long biModelId = 1651468516836098050L;
+        // 分析需求：
+        // 分析网站用户的增长情况
+        // 原始数据：
+        // 日期,用户数
+        // 1号,10
+        // 2号,20
+        // 3号,30
 
-        //预设AI模型id
-        // 用户输入这些预设示例
-        // "分析需求:\n" +
-        // "分析网站用户的增长情况\n" + 请使用chartType（图表类型）\n"+
-        // "原始数据:\n" +
-        // "日期,用户数\n" +
-        // "1号,10\n" +
-        // "2号,20\n" +
-        // "3号,3日");
-        Long biModelId = 1659920671007834113L;
+        // 构造用户输入
         StringBuilder userInput = new StringBuilder();
         userInput.append("分析需求：").append("\n");
-        //拼接分析目标
+
+        // 拼接分析目标
         String userGoal = goal;
-        if (StringUtils.isNotBlank(chatType)){
-            userGoal += "请使用" + chatType;
+        if (StringUtils.isNotBlank(chartType)) {
+            userGoal += "，请使用" + chartType;
         }
         userInput.append(userGoal).append("\n");
         userInput.append("原始数据：").append("\n");
-        //调用ExceltoCSV处理,压缩后的数据
+        // 压缩后的数据
         String csvData = ExcelUtils.ExceltoCSV(multipartFile);
         userInput.append(csvData).append("\n");
-        //调用AI生成
-        String resultStr = aiManager.doChat(biModelId, userInput.toString());
-        //拆分数据,拆分为三块，第一块是空字符串 ，第二块是Echarts代码，第三块是结论      "{前端 Echarts v5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n" +"【【【【【\n" + "{明确的数据分析结论:越详细越好，不要生成多余的注释}\n"+
-        String[] splits = resultStr.split("【【【【");
+
+        String result = aiManager.doChat(biModelId, userInput.toString());
+        String[] splits = result.split("【【【【【");
         if (splits.length < 3) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI生成错误");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
         }
         String genChart = splits[1].trim();
-        String genResult = splits[2];
-        //插入到数据库
+        String genResult = splits[2].trim();
+        // 插入到数据库
         Chart chart = new Chart();
         chart.setName(name);
         chart.setGoal(goal);
         chart.setChartData(csvData);
-        chart.setChartType(chatType);
+        chart.setChartType(chartType);
         chart.setGenChart(genChart);
         chart.setGenResult(genResult);
         chart.setUserId(loginUser.getId());
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
-        //返回前端
         BiResponse biResponse = new BiResponse();
         biResponse.setGenChart(genChart);
         biResponse.setGenResult(genResult);
         biResponse.setChartId(chart.getId());
         return ResultUtils.success(biResponse);
     }
-
 }
