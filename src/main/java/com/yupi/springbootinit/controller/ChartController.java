@@ -229,6 +229,7 @@ public class ChartController {
         return ResultUtils.success(result);
     }
 
+
     /**
      * 获取查询包装类
      *
@@ -260,10 +261,8 @@ public class ChartController {
     }
 
 
-
-
     /**
-     * 智能分析（同步）
+     * 智能分析
      *
      * @param multipartFile
      * @param genChartByAiRequest
@@ -280,6 +279,7 @@ public class ChartController {
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         User loginUser = userService.getLoginUser(request);
+
         // 无需写 prompt，直接调用现有模型，https://www.yucongming.com，公众号搜【鱼聪明AI】
 //        final String prompt = "你是一个数据分析师和前端开发专家，接下来我会按照以下固定格式给你提供内容：\n" +
 //                "分析需求：\n" +
@@ -291,7 +291,7 @@ public class ChartController {
 //                "{前端 Echarts V5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n" +
 //                "【【【【【\n" +
 //                "{明确的数据分析结论、越详细越好，不要生成多余的注释}";
-        long biModelId = 1651468516836098050L;
+        long biModelId = 1659171950288818178L;
         // 分析需求：
         // 分析网站用户的增长情况
         // 原始数据：
@@ -339,4 +339,6 @@ public class ChartController {
         biResponse.setChartId(chart.getId());
         return ResultUtils.success(biResponse);
     }
+
+
 }

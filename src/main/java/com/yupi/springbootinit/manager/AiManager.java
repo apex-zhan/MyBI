@@ -20,21 +20,19 @@ public class AiManager {
 
     /**
      * AI 对话
+     *
+     * @param modelId
      * @param message
      * @return
      */
-    public String doChat(Long moduleId,String message) {
-        //构造请求
+    public String doChat(long modelId, String message) {
         DevChatRequest devChatRequest = new DevChatRequest();
-        // 模型id，尾后加L，转成long类型
-//        devChatRequest.setModelId(1659920671007834113L);
-        devChatRequest.setModelId(moduleId);
+        devChatRequest.setModelId(modelId);
         devChatRequest.setMessage(message);
-        //返回结果
-        if (client == null){
-            throw  new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 响应错误");
-        }
         BaseResponse<DevChatResponse> response = client.doChat(devChatRequest);
+        if (response == null || response.getData() == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 响应错误");
+        }
         return response.getData().getContent();
     }
 }
