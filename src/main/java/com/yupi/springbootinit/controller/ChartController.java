@@ -1,5 +1,6 @@
 package com.yupi.springbootinit.controller;
 
+import cn.hutool.core.io.FileUtil;
 import com.alibaba.excel.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -32,6 +33,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 图表接口
@@ -280,7 +284,7 @@ public class ChartController {
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         User loginUser = userService.getLoginUser(request);
 
-        // 无需写 prompt，直接调用现有模型，https://www.yucongming.com，公众号搜【鱼聪明AI】
+        // 无需写 prompt，直接调用现有模型
 //        final String prompt = "你是一个数据分析师和前端开发专家，接下来我会按照以下固定格式给你提供内容：\n" +
 //                "分析需求：\n" +
 //                "{数据分析的需求或者目标}\n" +
@@ -291,9 +295,9 @@ public class ChartController {
 //                "{前端 Echarts V5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n" +
 //                "【【【【【\n" +
 //                "{明确的数据分析结论、越详细越好，不要生成多余的注释}";
-        long biModelId = 1659171950288818178L;
+        long biModelId = 1809441063995113473L;
         // 分析需求：
-        // 分析网站用户的增长情况
+        // 分析网站用户的增长情况：
         // 原始数据：
         // 日期,用户数
         // 1号,10
@@ -303,11 +307,10 @@ public class ChartController {
         // 构造用户输入
         StringBuilder userInput = new StringBuilder();
         userInput.append("分析需求：").append("\n");
-
         // 拼接分析目标
         String userGoal = goal;
         if (StringUtils.isNotBlank(chartType)) {
-            userGoal += "，请使用" + chartType;
+            userGoal += "，请使用" + chartType ;
         }
         userInput.append(userGoal).append("\n");
         userInput.append("原始数据：").append("\n");
@@ -315,8 +318,8 @@ public class ChartController {
         String csvData = ExcelUtils.ExceltoCSV(multipartFile);
         userInput.append(csvData).append("\n");
 
-        String result = aiManager.doChat(biModelId, userInput.toString());
-        String[] splits = result.split("【【【【【");
+        String resultStr = aiManager.doChat(biModelId, userInput.toString());
+        String[] splits = resultStr.split("【【【【【");
         if (splits.length < 3) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
         }
@@ -339,6 +342,5 @@ public class ChartController {
         biResponse.setChartId(chart.getId());
         return ResultUtils.success(biResponse);
     }
-
 
 }
