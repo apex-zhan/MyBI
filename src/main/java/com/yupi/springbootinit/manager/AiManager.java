@@ -20,7 +20,6 @@ public class AiManager {
 
     /**
      * AI 对话
-     *
      * @param modelId
      * @param message
      * @return
