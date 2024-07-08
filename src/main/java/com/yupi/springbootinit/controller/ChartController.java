@@ -342,5 +342,4 @@ public class ChartController {
         biResponse.setChartId(chart.getId());
         return ResultUtils.success(biResponse);
     }
-
 }
