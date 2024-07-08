@@ -2,6 +2,8 @@ package com.yupi.springbootinit.common;
 
 /**
  * 自定义错误码
+ *
+
  */
 public enum ErrorCode {
 

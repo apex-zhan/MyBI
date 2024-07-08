@@ -10,8 +10,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 微信开放平台配置
+ *
  */
 @Slf4j
+@Deprecated
 @Configuration
 @ConfigurationProperties(prefix = "wx.open")
 @Data
