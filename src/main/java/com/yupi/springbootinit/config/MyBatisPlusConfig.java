@@ -9,8 +9,6 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * MyBatis Plus 配置
- *
-
  */
 @Configuration
 @MapperScan("com.yupi.springbootinit.mapper")
@@ -18,7 +16,6 @@ public class MyBatisPlusConfig {
 
     /**
      * 拦截器配置
-     *
      * @return
      */
     @Bean

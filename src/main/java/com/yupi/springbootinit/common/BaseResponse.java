@@ -8,6 +8,7 @@ import lombok.Data;
  *
  * @param <T>
  */
+
 @Data
 public class BaseResponse<T> implements Serializable {
 
