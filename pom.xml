@@ -19,7 +19,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-<!--   https://yucongming.com 鱼聪明AI java-SDK-->
+<!--   https://yucongming.com 鱼聪明AI java-SDK   -->
     <dependencies>
         <dependency>
             <groupId>com.yucongming</groupId>
