@@ -462,19 +462,20 @@ public class ChartController {
         biResponse.setChartId(chart.getId());
         return ResultUtils.success(biResponse);
     }
-        // 上面的接口很多用到异常,直接定义一个工具类
-        public void handleChartUpdateError(long chartId, String execMessage) {
-            Chart updateChart = new Chart();
-            updateChart.setId(chartId);
-            updateChart.setStatus(QueueStatusEnum.FAILED.getValue());
-            updateChart.setExecMessage(execMessage);
-            boolean updateResult = chartService.updateById(updateChart);
-            if (!updateResult) {
-                log.error("更新图表状态失败" + chartId, execMessage);
-            }
+
+    // 上面的接口很多用到异常,直接定义一个工具类
+    public void handleChartUpdateError(long chartId, String execMessage) {
+        Chart updateChart = new Chart();
+        updateChart.setId(chartId);
+        updateChart.setStatus(QueueStatusEnum.FAILED.getValue());
+        updateChart.setExecMessage(execMessage);
+        boolean updateResult = chartService.updateById(updateChart);
+        if (!updateResult) {
+            log.error("更新图表状态失败" + chartId, execMessage);
+        }
 //            示例：handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
-        }
-        }
+    }
+}
 
 
 
