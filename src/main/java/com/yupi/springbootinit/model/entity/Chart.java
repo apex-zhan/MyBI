@@ -40,6 +40,16 @@ public class Chart implements Serializable {
     private String chartType;
 
     /**
+     * 状态
+     */
+    private String status;
+
+    /**
+     * 执行信息
+     */
+    private String execMessage;
+
+    /**
      * 生成的图表数据
      */
     private String genChart;
