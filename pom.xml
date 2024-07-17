@@ -18,13 +18,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-
-<!--   https://yucongming.com 鱼聪明AI java-SDK   -->
     <dependencies>
+        <!--   https://yucongming.com 鱼聪明AI java-SDK   -->
         <dependency>
             <groupId>com.yucongming</groupId>
             <artifactId>yucongming-java-sdk</artifactId>
             <version>0.0.4</version>
+        </dependency>
+        <!--    redisson-->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.21.3</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
