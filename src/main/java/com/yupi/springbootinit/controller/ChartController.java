@@ -473,7 +473,7 @@ public class ChartController {
         if (!updateResult) {
             log.error("更新图表状态失败" + chartId, execMessage);
         }
-//            示例：handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
+        //示例：handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
     }
 }
 
