@@ -77,6 +77,7 @@ public class Chart implements Serializable {
     /**
      * 是否删除
      * 通过在实体类的属性上添加此注解，可以告知ORM框架该属性用于逻辑删除的标记，
+     * 默认为0（未删除）
      */
     @TableLogic
     private Integer isDelete;
