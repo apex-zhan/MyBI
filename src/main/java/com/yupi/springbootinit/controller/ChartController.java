@@ -10,6 +10,7 @@ import com.yupi.springbootinit.common.BaseResponse;
 import com.yupi.springbootinit.common.DeleteRequest;
 import com.yupi.springbootinit.common.ErrorCode;
 import com.yupi.springbootinit.common.ResultUtils;
+import com.yupi.springbootinit.config.AiModelConfig;
 import com.yupi.springbootinit.constant.CommonConstant;
 import com.yupi.springbootinit.constant.UserConstant;
 import com.yupi.springbootinit.exception.BusinessException;
@@ -29,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.yupi.springbootinit.utils.ExcelUtils;
 import com.yupi.springbootinit.utils.SqlUtils;
+import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
@@ -47,6 +50,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RestController
 @RequestMapping("/chart")
 @Slf4j
+@Api(tags = "ChartController")
 public class ChartController {
 
     @Resource
@@ -60,6 +64,8 @@ public class ChartController {
     private RedisLimiterManager redisLimiterManager;
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
+    @Resource
+    private AiModelConfig aiModelConfig;
 
 
     private final static Gson GSON = new Gson();
@@ -96,7 +102,8 @@ public class ChartController {
      * @return
      */
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteChart(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    @Operation(summary = "通过id删除图表")
+    public BaseResponse<Boolean> deleteChartDocument(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -312,7 +319,7 @@ public class ChartController {
 //                "{前端 Echarts V5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n" +
 //                "【【【【【\n" +
 //                "{明确的数据分析结论、越详细越好，不要生成多余的注释}";
-        long biModelId = 1809441063995113473L;
+        long biModelId = aiModelConfig.getModelId();
         // 分析需求：
         // 分析网站用户的增长情况：
         // 原始数据：
@@ -361,7 +368,7 @@ public class ChartController {
     }
 
     /**
-     * 智能分析(异步)
+     * 智能分析（异步）
      *
      * @param multipartFile
      * @param genChartByAiRequest
@@ -377,21 +384,21 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
-        //校验文件大小
+        // 校验文件
         long size = multipartFile.getSize();
         String originalFilename = multipartFile.getOriginalFilename();
-        ThrowUtils.throwIf(size > 1024 * 1024 * 10, ErrorCode.PARAMS_ERROR, "文件超过10M");
-        //校验后缀
+        // 校验文件大小
+        final long ONE_MB = 1024 * 1024L;
+        ThrowUtils.throwIf(size > ONE_MB, ErrorCode.PARAMS_ERROR, "文件超过 1M");
+        // 校验文件后缀 aaa.png
         String suffix = FileUtil.getSuffix(originalFilename);
-        //定义合法的后缀列表
-        final String[] validFileSuffix = {"xlsx", "xls", "doc", "docx", "ppt", "pptx", "pdf", "txt", "md"};
-        ThrowUtils.throwIf(!Arrays.asList(validFileSuffix).contains(suffix), ErrorCode.PARAMS_ERROR, "文件类型不支持");
+        final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
+        ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
 
         User loginUser = userService.getLoginUser(request);
-        //限流判断,每一个用户一个限流器
+        // 限流判断，每个用户一个限流器
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
-
-        // 无需写 prompt，直接调用现有模型
+        // 无需写 prompt，直接调用现有模型，https://www.yucongming.com，公众号搜【鱼聪明AI】
 //        final String prompt = "你是一个数据分析师和前端开发专家，接下来我会按照以下固定格式给你提供内容：\n" +
 //                "分析需求：\n" +
 //                "{数据分析的需求或者目标}\n" +
@@ -402,9 +409,9 @@ public class ChartController {
 //                "{前端 Echarts V5 的 option 配置对象js代码，合理地将数据进行可视化，不要生成任何多余的内容，比如注释}\n" +
 //                "【【【【【\n" +
 //                "{明确的数据分析结论、越详细越好，不要生成多余的注释}";
-        long biModelId = 1809441063995113473L;
+        long biModelId = aiModelConfig.getModelId();
         // 分析需求：
-        // 分析网站用户的增长情况：
+        // 分析网站用户的增长情况
         // 原始数据：
         // 日期,用户数
         // 1号,10
@@ -414,6 +421,7 @@ public class ChartController {
         // 构造用户输入
         StringBuilder userInput = new StringBuilder();
         userInput.append("分析需求：").append("\n");
+
         // 拼接分析目标
         String userGoal = goal;
         if (StringUtils.isNotBlank(chartType)) {
@@ -436,35 +444,46 @@ public class ChartController {
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
 
         try {
-            //在最终的返回结果前提交一个任务
             CompletableFuture.runAsync(() -> {
-//                任务:先修改图表任务状态为“执行中”，等执行成功后，修改为“已完成”、保存执行结果;执行失败后，状态修改为“失败”，记录任务失败信息。
-                Chart updatechart = new Chart();
-                updatechart.setId(chart.getId());
-                updatechart.setStatus(QueueStatusEnum.RUNNING.getValue());
-                boolean updateResult = chartService.updateById(updatechart);
-                // 如果提交失败(一般情况下,更新失败可能意味着你的数据库出问题了)
-                if (!updateResult) {
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "图表更新失败");
+                // 先修改图表任务状态为 “执行中”。等执行成功后，修改为 “已完成”、保存执行结果；执行失败后，状态修改为 “失败”，记录任务失败信息。
+                Chart updateChart = new Chart();
+                updateChart.setId(chart.getId());
+                updateChart.setStatus(QueueStatusEnum.RUNNING.getValue());
+                boolean b = chartService.updateById(updateChart);
+                if (!b) {
+                    handleChartUpdateError(chart.getId(), "更新图表执行中状态失败");
+                    return;
                 }
-                //调用AI
-                String resultStr = aiManager.doChat(biModelId, userInput.toString());
-                String[] splits = resultStr.split("【【【【【");
+                // 调用 AI
+                String result = aiManager.doChat(biModelId, userInput.toString());
+                String[] splits = result.split("【【【【【");
                 if (splits.length < 3) {
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
+                    handleChartUpdateError(chart.getId(), "AI 生成错误");
+                    return;
                 }
-
+                String genChart = splits[1].trim();
+                String genResult = splits[2].trim();
+                Chart updateChartResult = new Chart();
+                updateChartResult.setId(chart.getId());
+                updateChartResult.setGenChart(genChart);
+                updateChartResult.setGenResult(genResult);
+                updateChartResult.setStatus(QueueStatusEnum.SUCCEED.getValue());
+                boolean updateResult = chartService.updateById(updateChartResult);
+                if (!updateResult) {
+                    handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
+                }
             }, threadPoolExecutor);
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.TO_MANY_REQUEST, "请求过于频繁，队列炸了🤯");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "任务队列炸了");
         }
+
         BiResponse biResponse = new BiResponse();
         biResponse.setChartId(chart.getId());
         return ResultUtils.success(biResponse);
     }
 
     // 上面的接口很多用到异常,直接定义一个工具类
-    public void handleChartUpdateError(long chartId, String execMessage) {
+    private void handleChartUpdateError(long chartId, String execMessage) {
         Chart updateChart = new Chart();
         updateChart.setId(chartId);
         updateChart.setStatus(QueueStatusEnum.FAILED.getValue());
@@ -473,9 +492,5 @@ public class ChartController {
         if (!updateResult) {
             log.error("更新图表状态失败" + chartId, execMessage);
         }
-        //示例：handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
     }
 }
-
-
-
