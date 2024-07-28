@@ -19,6 +19,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.17.0</version>
+        </dependency>
+
         <!--   https://yucongming.com 鱼聪明AI java-SDK   -->
         <dependency>
             <groupId>com.yucongming</groupId>
