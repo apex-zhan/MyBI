@@ -102,7 +102,6 @@ public class ChartController {
      * @return
      */
     @PostMapping("/delete")
-    @Operation(summary = "通过id删除图表")
     public BaseResponse<Boolean> deleteChartDocument(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
