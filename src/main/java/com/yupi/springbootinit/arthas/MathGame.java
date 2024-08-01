@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
+/**
+ * 练习arthas用的demo
+ */
 @Deprecated
 public class MathGame {
     private static Random random = new Random();
-
     private int illegalArgumentCount = 0;
 
     public static void main(String[] args) throws InterruptedException {
@@ -20,7 +23,7 @@ public class MathGame {
 
     public void run() throws InterruptedException {
         try {
-            int number = random.nextInt()/10000;
+            int number = random.nextInt() / 10000;
             List<Integer> primeFactors = primeFactors(number);
             print(number, primeFactors);
 
