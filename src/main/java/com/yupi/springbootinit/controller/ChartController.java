@@ -31,11 +31,10 @@ import javax.servlet.http.HttpServletRequest;
 import com.yupi.springbootinit.utils.ExcelUtils;
 import com.yupi.springbootinit.utils.SqlUtils;
 import io.swagger.annotations.Api;
-import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,7 +49,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RestController
 @RequestMapping("/chart")
 @Slf4j
-@Api(tags = "ChartController")
+@Api(tags = "图表接口")
 public class ChartController {
 
     @Resource
@@ -218,13 +217,14 @@ public class ChartController {
 //    }
 
     /**
-     * 编辑（用户）
+     * 编辑（图表）
      *
      * @param chartEditRequest
      * @param request
      * @return
      */
     @PostMapping("/edit")
+    @ApiOperation(value = "编辑图表")
     public BaseResponse<Boolean> editChart(@RequestBody ChartEditRequest chartEditRequest, HttpServletRequest request) {
         if (chartEditRequest == null || chartEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
