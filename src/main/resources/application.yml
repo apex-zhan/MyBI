@@ -33,11 +33,11 @@ spring:
     password:
 
   # 单机Redisson 配置
-#  redisson:
-#    address: redis://127.0.0.1:6379
-#    database: 2
-#    password:
-#      enabled: true
+  #  redisson:
+  #    address: redis://127.0.0.1:6379
+  #    database: 2
+  #    password:
+  #      enabled: true
 
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
@@ -51,6 +51,11 @@ spring:
     multipart:
       # 大小限制
       max-file-size: 10MB
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 server:
   address: 0.0.0.0
   port: 8101
@@ -82,7 +87,7 @@ wx:
       http-client-type: HttpClient
       key-prefix: wx
       redis:
-        host: 127.0.0.1
+        host: localhost
         port: 6379
       type: Memory
 
@@ -98,8 +103,8 @@ cos:
 # 鱼聪明AI 配置
 yuapi:
   client:
-    access-key: 
-    secret-key: 
+    access-key: fjz7i6iiezrrsn1934czla7dnqvc99nj
+    secret-key: m19fzz3xvey86phtofi2x8m2x8hzuucx
 
 # 要使用的模型ID
 ai:
