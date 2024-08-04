@@ -1,4 +1,4 @@
-package com.yupi.springbootinit.MQ;
+package com.zxw.springbootinit.MQ;
 
 
 import com.rabbitmq.client.Channel;

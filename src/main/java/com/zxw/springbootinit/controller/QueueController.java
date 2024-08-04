@@ -1,4 +1,4 @@
-package com.yupi.springbootinit.controller;
+package com.zxw.springbootinit.controller;
 
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;

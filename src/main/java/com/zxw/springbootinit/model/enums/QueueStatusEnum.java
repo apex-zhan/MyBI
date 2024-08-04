@@ -1,4 +1,4 @@
-package com.yupi.springbootinit.model.enums;
+package com.zxw.springbootinit.model.enums;
 
 import org.apache.commons.lang3.ObjectUtils;
 
