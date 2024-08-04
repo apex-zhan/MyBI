@@ -1,4 +1,4 @@
-package com.yupi.springbootinit.config;
+package com.zxw.springbootinit.config;
 
 import lombok.Data;
 import org.redisson.Redisson;

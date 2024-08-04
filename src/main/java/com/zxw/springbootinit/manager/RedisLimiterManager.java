@@ -1,7 +1,7 @@
-package com.yupi.springbootinit.manager;
+package com.zxw.springbootinit.manager;
 
-import com.yupi.springbootinit.common.ErrorCode;
-import com.yupi.springbootinit.exception.BusinessException;
+import com.zxw.springbootinit.common.ErrorCode;
+import com.zxw.springbootinit.exception.BusinessException;
 import org.redisson.Redisson;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateIntervalUnit;
