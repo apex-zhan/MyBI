@@ -103,8 +103,8 @@ cos:
 # 鱼聪明AI 配置
 yuapi:
   client:
-    access-key: fjz7i6iiezrrsn1934czla7dnqvc99nj
-    secret-key: m19fzz3xvey86phtofi2x8m2x8hzuucx
+    access-key: 
+    secret-key: 
 
 # 要使用的模型ID
 ai:
