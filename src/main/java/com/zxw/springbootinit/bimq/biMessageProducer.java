@@ -1,5 +1,6 @@
 package com.zxw.springbootinit.bimq;
 
+import com.zxw.springbootinit.constant.biconstant;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 

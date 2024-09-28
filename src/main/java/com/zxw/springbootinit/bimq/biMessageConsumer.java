@@ -6,6 +6,7 @@ import com.rabbitmq.client.Channel;
 
 import com.zxw.springbootinit.common.ErrorCode;
 import com.zxw.springbootinit.constant.CommonConstant;
+import com.zxw.springbootinit.constant.biconstant;
 import com.zxw.springbootinit.exception.BusinessException;
 import com.zxw.springbootinit.manager.AiManager;
 import com.zxw.springbootinit.model.entity.Chart;
