@@ -100,13 +100,13 @@ cos:
     region: xxx
     bucket: xxx
 
-# 鱼聪明AI 配置
-yuapi:
-  client:
-    access-key: 
-    secret-key: 
+tencent:
+  deepseek:
+    client:
+      secret-id:
+      secret-key:
 
 # 要使用的模型ID
-ai:
-  model:
-    model-id: 1809441063995113473
+#ai:
+#  model:
+#    model-id: 1809441063995113473
