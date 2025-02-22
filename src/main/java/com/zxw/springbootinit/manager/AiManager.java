@@ -1,6 +1,5 @@
 package com.zxw.springbootinit.manager;
 
-import com.tencentcloudapi.common.AbstractModel;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.lkeap.v20240522.models.ChatCompletionsRequest;
 import com.tencentcloudapi.lkeap.v20240522.models.ChatCompletionsResponse;
@@ -39,9 +38,10 @@ public class AiManager {
                 "{csv格式的原始数据，用,作为分隔符}" +
                 "请根据这两部分内容，按照以下指定格式生成内容（此外不要输出任何多余的开头、结尾、注释）" +
                 "【【【【【" +
-                "{前端 Echarts V5 的 option 配置对象代码，合理地将数据进行可视化，并且是严格的json格式，不要生成任何多余的内容，比如注释和单引号}" +
+                "{前端 Echarts V5 的 option 配置对象js代码(输出json格式)，合理地将数据进行可视化，并且是严格的json格式，不要生成任何多余的内容，比如注释和单引号}" +
                 "【【【【【" +
-                "{明确的数据分析结论、越详细越好，不要生成多余的注释和单引号}";
+                "{明确的数据分析结论、越详细越好，不要生成多余的注释和单引号和\n这个转义符}"+
+                "【【【【【";
         try {
             // 实例化一个请求对象,每个接口都会对应一个request对象
             ChatCompletionsRequest req = new ChatCompletionsRequest();
@@ -66,13 +66,15 @@ public class AiManager {
 
             // 返回的resp是一个ChatCompletionsResponse的实例，与请求对象对应
             ChatCompletionsResponse resp = deepSeekClientConfig.deepSeekClient().ChatCompletions(req);
+            String content = resp.getChoices()[0].getMessage().getContent();
+            return content;
             // 输出json格式的字符串回包
 //            if (resp.isStream()) { // 流式响应
 //                for (SSEResponseModel.SSE e : resp) {
 //                    System.out.println(e.Data);
 //                }
 //            } else { // 非流式响应
-            return AbstractModel.toJsonString(resp);
+//            return AbstractModel.toJsonString(resp);
         } catch (TencentCloudSDKException e) {
             e.printStackTrace();
             log.error("AI对话失败", e);
