@@ -23,14 +23,9 @@ import com.zxw.springbootinit.model.enums.QueueStatusEnum;
 import com.zxw.springbootinit.model.vo.BiResponse;
 import com.zxw.springbootinit.service.ChartService;
 import com.zxw.springbootinit.service.UserService;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
 import com.zxw.springbootinit.service.impl.ChartServiceImpl;
 import com.zxw.springbootinit.utils.ExcelUtils;
 import com.zxw.springbootinit.utils.SqlUtils;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -38,6 +33,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -328,25 +325,34 @@ public class ChartController {
 
         // 构造用户输入
         StringBuilder userInput = new StringBuilder();
-        userInput.append("分析需求：").append("\n");
+        userInput.append("分析需求：").append("");
         // 拼接分析目标
         String userGoal = goal;
         if (StringUtils.isNotBlank(chartType)) {
             userGoal += "，请使用" + chartType;
         }
-        userInput.append(userGoal).append("\n");
-        userInput.append("原始数据：").append("\n");
+        userInput.append(userGoal).append("");
+        userInput.append("原始数据：").append("");
         // 压缩后的数据
         String csvData = ExcelUtils.ExceltoCSV(multipartFile);
-        userInput.append(csvData).append("\n");
+        userInput.append(csvData).append("");
 
         String resultStr = aiManager.doChat(biModelId, userInput.toString());
+        //获取结果
         String[] splits = resultStr.split("【【【【【");
+        //如果splits长度小于3，说明生成的结果不符合要求
         if (splits.length < 3) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误，请重试");
         }
+        // 生成图表配置
         String genChart = splits[1].trim();
         String genResult = splits[2].trim();
+        //转义字符符合 JSON 规范
+        genChart = genChart.replaceAll("[\u200B-\u200D\uFEFF]", "");
+        genChart = genChart.replace("\\n", "");
+        genChart = genChart.replace("\\", "");
+        genChart = genChart.replaceAll("\n", "").replaceAll("\\s{2,}", " ").trim();
+
         // 插入到数据库
         Chart chart = new Chart();
         chart.setName(name);
@@ -356,6 +362,7 @@ public class ChartController {
         chart.setGenChart(genChart);
         chart.setGenResult(genResult);
         chart.setUserId(loginUser.getId());
+        chart.setStatus(QueueStatusEnum.SUCCEED.getValue());
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
         BiResponse biResponse = new BiResponse();
@@ -396,7 +403,7 @@ public class ChartController {
         User loginUser = userService.getLoginUser(request);
         // 限流判断，每个用户一个限流器
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
-        // 无需写 prompt，直接调用现有模型，https://www.yucongming.com，公众号搜【鱼聪明AI】
+        // 无需写 prompt，直接调用现有模型
 //        final String prompt = "你是一个数据分析师和前端开发专家，接下来我会按照以下固定格式给你提供内容：\n" +
 //                "分析需求：\n" +
 //                "{数据分析的需求或者目标}\n" +
